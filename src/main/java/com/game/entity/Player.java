@@ -1,18 +1,57 @@
 package com.game.entity;
 
+import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
 //TODO logging
+@Entity
+@Table(name = "player")
 public class Player {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
-    private String name, title;
-    private Race race;
-    private Profession profession;
-    private Integer experience, level, untilNextLevel;
+    @Column(name = "name",  length = 12)
+    private String name;
+    @Column(name = "title", length = 30)
+    private String title;
+    @Column(name = "race")
+    private String race;
+    @Column(name = "profession")
+    private String profession;
+    @Column(name = "experience")
+    private Integer experience;
+    @Column(name = "level")
+    private Integer level;
+    @Column(name = "untilNextLevel")
+    private Integer untilNextLevel;
+    @Temporal(TemporalType.DATE)
+    @Column(name = "birthday")
     private Date birthday;
+    @Column(name = "banned")
     private Boolean banned;
+
+    public Player(String name, String title, Race race, Profession profession, Integer experience, Date birthday, Boolean banned) {
+        this.id = 0L;
+        this.name = name;
+        this.title = title;
+        this.race = race.toString();
+        this.profession = profession.toString();
+        this.experience = experience;
+        this.birthday = birthday;
+        if (banned)
+            this.banned = banned;
+        else {
+            this.banned = false;
+        }
+    }
+
+    public Player() {
+
+    }
+
 
     public Long getId() {
         return id;
@@ -26,11 +65,8 @@ public class Player {
         return name;
     }
 
-    public void setName(String name) throws Exception {
-        if (name.length() > 12) throw new Exception("too long name");
-        else {
+    public void setName(String name) {
             this.name = name;
-        }
     }
 
     public String getTitle() {
@@ -38,25 +74,22 @@ public class Player {
     }
 
     public void setTitle(String title) throws Exception {
-        if (title.length() > 30) throw new Exception("too long title");
-        else {
             this.title = title;
-        }
     }
 
-    public Race getRace() {
+    public String getRace() {
         return race;
     }
 
-    public void setRace(Race race) {
+    public void setRace(String race) {
         this.race = race;
     }
 
-    public Profession getProfession() {
+    public String getProfession() {
         return profession;
     }
 
-    public void setProfession(Profession profession) {
+    public void setProfession(String profession) {
         this.profession = profession;
     }
 
