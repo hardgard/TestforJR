@@ -59,12 +59,12 @@ public class PlayerController {
         return new ResponseEntity<>(player, HttpStatus.OK);
     }
 
-    @PutMapping("/rest/players/{id}")
+    @PostMapping("/rest/players/{id}")
     public ResponseEntity<?> update(@RequestBody Player player, @PathVariable Long id) {
         try {
             logger.debug("update() updating "+ player);
             Player existPlayer = playerService.getPlayer(id);
-            player.setId(id);
+           player.setId(id);
 
             return create(player);
         } catch (NoSuchElementException e) {
