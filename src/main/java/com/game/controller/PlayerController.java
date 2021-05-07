@@ -1,14 +1,19 @@
 package com.game.controller;
 
 import com.game.entity.Player;
+import com.game.repository.PlayerRepository;
 import com.game.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -19,14 +24,44 @@ public class PlayerController {
 
     @Autowired
     PlayerService playerService;
+    @Autowired
+    private PlayerRepository playerRepository;
 
     public PlayerController(PlayerService playerService) {
         this.playerService = playerService;
     }
 
     @GetMapping(value ="/rest/players")
-    public ResponseEntity<List<Player>> readALl() {
-        final List<Player> players = playerService.readAll();
+    public ResponseEntity<List<Player>> readALl(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) Integer minExperience,
+            @RequestParam(required = false) Integer maxExperience,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "3") int pageSize) {
+
+
+        List<Player> players;
+
+        Pageable paging = PageRequest.of(pageNumber, pageSize);
+
+        Page<Player> pagePlayers;
+
+        if (title != null)
+            pagePlayers = playerRepository.findByTitleContaining(title, paging);
+        else if (name != null)
+            pagePlayers = playerRepository.findByNameContaining(name, paging);
+        else if(minExperience != null && maxExperience != null)
+            pagePlayers = playerRepository.findByExperienceGreaterThanEqual(minExperience,paging);
+        else
+            pagePlayers =  playerRepository.findAll(paging);
+
+
+
+
+        players = pagePlayers.getContent();
+
+
         logger.debug("readALl()) have read "+players);
         return players != null && !players.isEmpty()
                 ? new ResponseEntity<>(players, HttpStatus.OK)
