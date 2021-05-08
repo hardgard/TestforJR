@@ -67,8 +67,10 @@ public class PlayerController {
             pagePlayers = playerRepository.findByRaceContaining(race, paging);
         else if (profession != null)
             pagePlayers = playerRepository.findByProfessionContaining(profession, paging);
-        else if(minExperience != null && maxExperience != null)
+        else if(minExperience != null )
             pagePlayers = playerRepository.findByExperienceGreaterThanEqual(minExperience,paging);
+        else if(maxExperience != null )
+            pagePlayers = playerRepository.findByExperienceLessThanEqual(maxExperience,paging);
         else
             pagePlayers =  playerRepository.findAll(paging);
 
@@ -84,8 +86,40 @@ public class PlayerController {
     }
 
     @GetMapping(value ="/rest/players/count")
-    public Integer count() {
-        return (int) playerRepository.count();
+    public Integer count(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String race,
+            @RequestParam(required = false) String profession,
+            @RequestParam(defaultValue = "id") String order,
+            @RequestParam(required = false) String banned,
+            @RequestParam(required = false) Integer minExperience,
+            @RequestParam(required = false) Integer maxExperience,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "3") int pageSize) {
+        order = order.toLowerCase(Locale.ROOT);
+        Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(order));
+
+
+        if (title != null)
+            return (int)playerRepository.findByTitleContaining(title, paging).getTotalElements();
+        else if (name != null)
+            return (int)playerRepository.findByNameContaining(name, paging).getTotalElements();
+        else if (banned != null)
+            if (banned.equals("false"))
+                return (int) playerRepository.findByBanned(false, paging).getTotalElements();
+            else
+                return (int) playerRepository.findByBanned(true, paging).getTotalElements();
+        else if (race != null)
+            return (int) playerRepository.findByRaceContaining(race, paging).getTotalElements();
+        else if (profession != null)
+            return (int) playerRepository.findByProfessionContaining(profession, paging).getTotalElements();
+        else if (minExperience != null)
+            return (int) playerRepository.findByExperienceGreaterThanEqual(minExperience, paging).getTotalElements();
+        else if (maxExperience != null)
+            return (int) playerRepository.findByExperienceLessThanEqual(maxExperience, paging).getTotalElements();
+        else
+            return (int) playerRepository.findAll(paging).getTotalElements();
     }
 
     @GetMapping("/rest/players/{id}")
