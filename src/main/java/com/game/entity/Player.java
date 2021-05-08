@@ -41,11 +41,7 @@ public class Player {
         this.profession = profession.toString();
         this.experience = experience;
         this.birthday = birthday;
-        if (banned)
-            this.banned = banned;
-        else {
-            this.banned = false;
-        }
+        this.banned = banned;
     }
 
     public Player() {

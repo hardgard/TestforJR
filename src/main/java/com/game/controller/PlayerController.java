@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -35,15 +37,20 @@ public class PlayerController {
     public ResponseEntity<List<Player>> readALl(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String title,
+            @RequestParam(required = false) String race,
+            @RequestParam(required = false) String profession,
+            @RequestParam(defaultValue = "id") String order,
+            @RequestParam(required = false) String banned,
             @RequestParam(required = false) Integer minExperience,
             @RequestParam(required = false) Integer maxExperience,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "3") int pageSize) {
 
+        order = order.toLowerCase(Locale.ROOT);
 
         List<Player> players;
 
-        Pageable paging = PageRequest.of(pageNumber, pageSize);
+        Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(order));
 
         Page<Player> pagePlayers;
 
@@ -51,6 +58,15 @@ public class PlayerController {
             pagePlayers = playerRepository.findByTitleContaining(title, paging);
         else if (name != null)
             pagePlayers = playerRepository.findByNameContaining(name, paging);
+        else if (banned != null)
+            if (banned.equals("false"))
+                pagePlayers = playerRepository.findByBanned(false, paging);
+            else
+                pagePlayers = playerRepository.findByBanned(true, paging);
+        else if (race != null)
+            pagePlayers = playerRepository.findByRaceContaining(race, paging);
+        else if (profession != null)
+            pagePlayers = playerRepository.findByProfessionContaining(profession, paging);
         else if(minExperience != null && maxExperience != null)
             pagePlayers = playerRepository.findByExperienceGreaterThanEqual(minExperience,paging);
         else
@@ -61,7 +77,6 @@ public class PlayerController {
 
         players = pagePlayers.getContent();
 
-
         logger.debug("readALl()) have read "+players);
         return players != null && !players.isEmpty()
                 ? new ResponseEntity<>(players, HttpStatus.OK)
@@ -70,7 +85,7 @@ public class PlayerController {
 
     @GetMapping(value ="/rest/players/count")
     public Integer count() {
-        return playerService.readAll().size();
+        return (int) playerRepository.count();
     }
 
     @GetMapping("/rest/players/{id}")
