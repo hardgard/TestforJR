@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface PlayerRepository extends JpaRepository<Player,Long> {
     Page<Player> findByNameContaining(String name, Pageable pageable);
     Page<Player> findByTitleContaining(String title, Pageable pageable);
@@ -16,6 +18,9 @@ public interface PlayerRepository extends JpaRepository<Player,Long> {
     Page<Player> findByExperienceGreaterThanEqual(@Param("minExperience") Integer minExperience, Pageable pageable);
     @Query("select p from Player p where p.experience <= :maxExperience")
     Page<Player> findByExperienceLessThanEqual(@Param("maxExperience") Integer maxExperience, Pageable pageable);
+    @Query("select p from Player p where p.experience <= :maxExperience and p.experience >= :minExperience")
+    Page<Player> findByExperienceBetween(@Param("maxExperience") Integer maxExperience,@Param("minExperience") Integer minExperience, Pageable pageable);
     Page<Player> findByBanned(Boolean banned, Pageable pageable);
+
 
 }
