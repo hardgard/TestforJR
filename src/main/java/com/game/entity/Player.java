@@ -5,7 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-//TODO logging
+
 @Entity
 @Table(name = "player")
 public class Player {
