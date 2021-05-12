@@ -37,8 +37,8 @@ public class Player {
         this.id = 0L;
         this.name = name;
         this.title = title;
-        this.race = race.toString();
-        this.profession = profession.toString();
+        this.race = race.getFieldName();
+        this.profession = profession.getFieldName();
         this.experience = experience;
         this.birthday = birthday;
         this.banned = banned;
@@ -69,20 +69,20 @@ public class Player {
         return title;
     }
 
-    public void setTitle(String title) throws Exception {
+    public void setTitle(String title) {
             this.title = title;
     }
 
-    public String getRace() {
-        return race;
+    public Race getRace() {
+        return Race.getRaceByName(race);
     }
 
     public void setRace(String race) {
         this.race = race;
     }
 
-    public String getProfession() {
-        return profession;
+    public Profession getProfession() {
+        return Profession.getProByName(profession);
     }
 
     public void setProfession(String profession) {
@@ -93,11 +93,8 @@ public class Player {
         return experience;
     }
 
-    public void setExperience(Integer experience) throws Exception {
-        if (experience < 0 || experience > 10000) throw new Exception("impossible exp");
-        else {
+    public void setExperience(Integer experience){
             this.experience = experience;
-        }
     }
 
     public Integer getLevel() {
@@ -120,13 +117,8 @@ public class Player {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) throws Exception {
-        Date twoThousand = new GregorianCalendar(2000,Calendar.JANUARY,1).getTime();
-        Date threeThousand = new GregorianCalendar(2999,Calendar.DECEMBER,31).getTime();
-        if (birthday.before(twoThousand) || birthday.after(threeThousand)) throw new Exception("wrong date of reg - birthday");
-        else{
+    public void setBirthday(Date birthday) {
             this.birthday = birthday;
-        }
     }
 
     public Boolean getBanned() {

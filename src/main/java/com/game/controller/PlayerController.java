@@ -1,10 +1,7 @@
 package com.game.controller;
 
 import com.game.entity.Player;
-import com.game.repository.PlayerRepository;
 import com.game.service.PlayerService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -196,57 +193,86 @@ public class PlayerController {
     @GetMapping("/rest/players/{id}")
     public ResponseEntity<Player> get(@PathVariable Long id) {
         try {
-            if(id < 0){
+            if(id <= 0){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             Player player = playerService.getPlayer(id);
             return new ResponseEntity<>(player, HttpStatus.OK);
-        } catch (NoSuchElementException e) {
+        } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/rest/players")
     public ResponseEntity<?> create(@RequestBody Player player) {
-        Date twoThousand = new GregorianCalendar(2000,Calendar.JANUARY,1).getTime();
-        Date threeThousand = new GregorianCalendar(2999,Calendar.DECEMBER,31).getTime();
-            if(player.getName().isEmpty() || player.getName().length() > 12 || player.getTitle().isEmpty() || player.getExperience() == null
-                    || player.getTitle().length() > 30 || player.getRace().isEmpty() || player.getProfession().isEmpty() ||
-                    player.getExperience() < 0 || player.getExperience() > 10000
-                    || player.getBirthday().before(twoThousand)    || player.getBirthday().after(threeThousand)){
+        try {
+            Date twoThousand = new GregorianCalendar(2000, Calendar.JANUARY, 1).getTime();
+            Date threeThousand = new GregorianCalendar(2999, Calendar.DECEMBER, 31).getTime();
+            if (player.toString().length()==0 || player.getBirthday().getTime() < 0 || player.getName().isEmpty() || player.getName().length() > 12 || player.getTitle().isEmpty() || player.getExperience() == null
+                    || player.getTitle().length() > 30 || player.getRace()== null || player.getProfession()==null ||
+                    player.getExperience() < 0 || player.getExperience() > 10000000
+                    || player.getBirthday().before(twoThousand) || player.getBirthday().after(threeThousand)) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-        player.setLevel((int) ((Math.sqrt(2500 + 200 * player.getExperience()) - 50) / 100));
-        player.setUntilNextLevel(50 * (player.getLevel() + 1) * (player.getLevel() + 2) - player.getExperience());
-        playerService.create(player);
-        return new ResponseEntity<>(player, HttpStatus.OK);
+            player.setLevel((int) ((Math.sqrt(2500 + 200 * player.getExperience()) - 50) / 100));
+            player.setUntilNextLevel(50 * (player.getLevel() + 1) * (player.getLevel() + 2) - player.getExperience());
+            playerService.create(player);
+            return new ResponseEntity<>(player, HttpStatus.OK);
+        } catch (NullPointerException e){
+           return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/rest/players/{id}")
     public ResponseEntity<?> update(@RequestBody Player player, @PathVariable Long id) {
         try {
-            if(id < 0){
+            if (id <= 0) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             Player existPlayer = playerService.getPlayer(id);
-            player.setId(id);
-
-            return create(player);
-        } catch (NoSuchElementException e) {
+            if (player.getName() == null) player.setName(existPlayer.getName());
+            if (player.getTitle() == null) player.setTitle(existPlayer.getTitle());
+            if (player.getRace() == null) player.setRace(existPlayer.getRace().getFieldName());
+            if (player.getProfession() == null) player.setProfession(existPlayer.getProfession().getFieldName());
+            if (player.getBirthday() == null) player.setBirthday(existPlayer.getBirthday());
+            if (player.getExperience() == null) player.setExperience(existPlayer.getExperience());
+            if (player.getBanned() == null) player.setBanned(existPlayer.getBanned());
+        } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        player.setId(id);
+            Date twoThousand = new GregorianCalendar(2000, Calendar.JANUARY, 1).getTime();
+            Date threeThousand = new GregorianCalendar(2999, Calendar.DECEMBER, 31).getTime();
+            if (player.getBirthday().getTime() < 0 || player.getName().isEmpty() || player.getName().length() > 12 || player.getTitle().isEmpty() || player.getExperience() == null
+                    || player.getTitle().length() > 30 ||
+                    player.getExperience() < 0 || player.getExperience() > 10000000
+                    || player.getBirthday().before(twoThousand) || player.getBirthday().after(threeThousand)) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+
+
+            player.setLevel((int) ((Math.sqrt(2500 + 200 * player.getExperience()) - 50) / 100));
+            player.setUntilNextLevel(50 * (player.getLevel() + 1) * (player.getLevel() + 2) - player.getExperience());
+            playerService.create(player);
+            return new ResponseEntity<>(player, HttpStatus.OK);
+
+            // }catch (NullPointerException n){ return new ResponseEntity<>(player, HttpStatus.OK);
+
+
     }
 
     @DeleteMapping("/rest/players/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         try {
-            if(id < 0){
+            if(id <= 0){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             playerService.deletePlayer(id);
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (NoSuchElementException e){
+        }catch (IllegalArgumentException e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

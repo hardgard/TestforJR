@@ -22,12 +22,20 @@ public class PlayerService {
         playerRepository.save(player);
     }
 
-    public Player getPlayer(Long id) {
-        return playerRepository.findById(id).get();
+    public Player getPlayer(Long id)throws IllegalArgumentException {
+        if (playerRepository.findById(id).isPresent()) {
+            return playerRepository.findById(id).get();
+        }else {
+            throw new IllegalArgumentException();
+        }
     }
 
-    public void deletePlayer(Long id) {
-        playerRepository.deleteById(id);
+    public void deletePlayer(Long id)throws IllegalArgumentException{
+        if (playerRepository.findById(id).isPresent()){
+            playerRepository.deleteById(id);
+        }else {
+            throw new IllegalArgumentException();
+        }
     }
 
 }
